@@ -36,12 +36,15 @@ class Timeline:
     async def get_timeline(client: BskyClient) -> list[HumanPost]:
         posts = await client.client.get_timeline()
         data = []
+        keys = []
         for post in posts.feed:
             try:
                 d = HumanPost.parse(post)
-                if d and await PostCache.get(d):
+                key = PostCache.key(d)
+                if await PostCache.get(d) or key in keys:
                     continue
                 data.append(d)
+                keys.append(key)
             except Exception as e:
                 print(e)
                 logs.error(
@@ -49,6 +52,7 @@ class Timeline:
                     post.post.uri if post.post else str(e),
                 )
         data.reverse()
+        keys.clear()
         return data
 
     @staticmethod
