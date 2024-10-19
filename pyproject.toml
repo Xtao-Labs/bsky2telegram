@@ -1,0 +1,30 @@
+[project]
+name = "bsky2telegram"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "apscheduler>=3.10.4",
+    "atproto>=0.0.54",
+    "cashews[redis]>=7.3.2",
+    "coloredlogs>=15.0.1",
+    "persica>=0.1.0a4",
+    "pydantic-settings>=2.6.0",
+    "pydantic>=2.9.2",
+    "pyrogram",
+    "pyrotgcrypto>=1.2.7",
+    "python-dotenv>=1.0.1",
+    "pytz>=2024.2",
+    "ujson>=5.10.0",
+]
+
+[tool.uv]
+dev-dependencies = [
+    "pytest>=8.3.3",
+    "pytest-asyncio>=0.24.0",
+    "ruff>=0.7.0",
+]
+
+[tool.uv.sources]
+pyrogram = { git = "https://github.com/TeamPGM/pyrogram" }
