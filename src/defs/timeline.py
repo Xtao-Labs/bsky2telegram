@@ -127,8 +127,9 @@ class Timeline:
 
     @staticmethod
     async def send_posts(client: BskyClient, bot: Client):
-        logs.info("Sending posts to user...")
+        logs.info("Fetching posts to user...")
         posts = await Timeline.get_timeline(client)
+        logs.info(f"Got {len(posts)} posts...Sending...")
         for post in posts:
             try:
                 await Timeline.send_to_user(bot, post)
