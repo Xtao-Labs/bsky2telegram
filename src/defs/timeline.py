@@ -63,9 +63,8 @@ class Timeline:
         )
 
     @staticmethod
-    def get_media_group(post: HumanPost) -> list[InputMediaPhoto]:
+    def get_media_group(text: str, post: HumanPost) -> list[InputMediaPhoto]:
         data = []
-        text = post.content
         images = post.images
         for idx, image in enumerate(images):
             data.append(
@@ -78,11 +77,16 @@ class Timeline:
         return data
 
     @staticmethod
-    @flood_wait()
-    async def send_to_user(bot: Client, post: HumanPost):
+    def get_post_text(post: HumanPost) -> str:
         text = "<b>Bsky Timeline Update</b>\n\n<code>"
         text += post.content
         text += f"</code>\n\n{post.author.format} 发表于 {post.time_str}"
+        return text
+
+    @staticmethod
+    @flood_wait()
+    async def send_to_user(bot: Client, post: HumanPost):
+        text = Timeline.get_post_text(post)
         if post.gif:
             return await bot.send_animation(
                 config.push.chat_id,
@@ -113,7 +117,7 @@ class Timeline:
         else:
             await bot.send_media_group(
                 config.push.chat_id,
-                Timeline.get_media_group(post),
+                Timeline.get_media_group(text, post),
                 reply_to_message_id=config.push.topic_id,
             )
 
