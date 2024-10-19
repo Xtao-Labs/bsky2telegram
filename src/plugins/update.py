@@ -35,9 +35,9 @@ class UpdateBotPlugin(BaseComponent):
             await update_all(client, telegram_bot.bot, message)
 
         @scheduler.scheduler.scheduled_job(
-            "cron", hour="*", minute="*", second="0", id="update_all"
+            "cron", hour="*", minute="*/5", second="0", id="update_all"
         )
-        async def update_all_1_minutes():
+        async def update_all_5_minutes():
             if _lock.locked():
                 return
             async with _lock:
