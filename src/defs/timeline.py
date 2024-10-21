@@ -107,15 +107,6 @@ class Timeline:
                 parse_mode=ParseMode.HTML,
                 reply_markup=Timeline.get_button(post),
             )
-        elif post.external:
-            return await bot.send_document(
-                config.push.chat_id,
-                post.external,
-                caption=text,
-                reply_to_message_id=config.push.topic_id,
-                parse_mode=ParseMode.HTML,
-                reply_markup=Timeline.get_button(post),
-            )
         elif not post.images:
             return await bot.send_message(
                 config.push.chat_id,
