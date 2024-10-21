@@ -131,8 +131,6 @@ class HumanPost(BaseModel, frozen=False):
             return "引用"
         elif self.is_reply:
             return "回复"
-        elif self.is_repost:
-            return "转发"
         return "发表"
 
     @staticmethod
