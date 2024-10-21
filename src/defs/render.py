@@ -19,7 +19,10 @@ if TYPE_CHECKING:
         PostView,
         ThreadViewPost,
     )
-    from atproto_client.models.app.bsky.actor.defs import ProfileViewBasic
+    from atproto_client.models.app.bsky.actor.defs import (
+        ProfileViewBasic,
+        ProfileViewDetailed,
+    )
 
 TZ = pytz.timezone("Asia/Shanghai")
 
@@ -28,8 +31,13 @@ class HumanAuthor(BaseModel):
     display_name: str
     handle: str
     did: str
-    avatar_img: str
+    avatar_img: Optional[str] = None
     created_at: datetime
+
+    description: Optional[str] = None
+    followers_count: Optional[int] = None
+    follows_count: Optional[int] = None
+    posts_count: Optional[int] = None
 
     @property
     def url(self) -> str:
@@ -39,15 +47,48 @@ class HumanAuthor(BaseModel):
     def format(self) -> str:
         return f'<a href="{self.url}">{self.display_name}</a>'
 
+    @property
+    def format_handle(self) -> str:
+        return f'<a href="{self.url}">@{self.handle}</a>'
+
+    @property
+    def time_str(self) -> str:
+        # utc+8
+        return self.created_at.astimezone(TZ).strftime("%Y-%m-%d %H:%M:%S")
+
     @staticmethod
     def parse(author: "ProfileViewBasic") -> "HumanAuthor":
         return HumanAuthor(
-            display_name=author.display_name,
+            display_name=author.display_name or author.handle,
             handle=author.handle,
             did=author.did,
             avatar_img=author.avatar,
             created_at=author.created_at,
         )
+
+    @staticmethod
+    def parse_detail(author: "ProfileViewDetailed") -> "HumanAuthor":
+        return HumanAuthor(
+            display_name=author.display_name or author.handle,
+            handle=author.handle,
+            did=author.did,
+            avatar_img=author.avatar,
+            created_at=author.created_at,
+            description=author.description,
+            followers_count=author.followers_count,
+            follows_count=author.follows_count,
+            posts_count=author.posts_count,
+        )
+
+
+class HumanRepostInfo(BaseModel):
+    by: HumanAuthor
+    at: datetime
+
+    @property
+    def time_str(self) -> str:
+        # utc+8
+        return self.at.astimezone(TZ).strftime("%Y-%m-%d %H:%M:%S")
 
 
 class HumanPost(BaseModel, frozen=False):
@@ -72,7 +113,8 @@ class HumanPost(BaseModel, frozen=False):
     is_reply: bool = False
     is_repost: bool = False
 
-    parent_post: "HumanPost" = None
+    repost_info: Optional[HumanRepostInfo] = None
+    parent_post: Optional["HumanPost"] = None
 
     @property
     def url(self) -> str:
@@ -132,12 +174,14 @@ class HumanPost(BaseModel, frozen=False):
     def parse(data: "FeedViewPost") -> "HumanPost":
         base = HumanPost.parse_view(data.post)
         is_quote, is_reply, is_repost = False, False, False
-        parent_post = None
+        parent_post, repost_info = None, None
         if data.reply:
             is_reply = True
-            parent_post = HumanPost.parse_view(data.reply.parent)
+            if hasattr(data.reply.parent, "post"):
+                parent_post = HumanPost.parse_view(data.reply.parent)
         elif data.reason:
             is_repost = True
+            repost_info = HumanRepostInfo(by=HumanAuthor.parse(data.reason.by), at=data.reason.at)
         elif data.post.embed and isinstance(data.post.embed, BskyViewRecord):
             is_quote = True
             if isinstance(data.post.embed.record, BskyViewRecordRecord):
@@ -146,6 +190,7 @@ class HumanPost(BaseModel, frozen=False):
         base.is_reply = is_reply
         base.is_repost = is_repost
         base.parent_post = parent_post
+        base.repost_info = repost_info
         return base
 
     @staticmethod
@@ -155,7 +200,8 @@ class HumanPost(BaseModel, frozen=False):
         parent_post = None
         if data.parent:
             is_reply = True
-            parent_post = HumanPost.parse_view(data.parent.post)
+            if hasattr(data.parent, "post"):
+                parent_post = HumanPost.parse_thread(data.parent)
         elif data.post.embed and isinstance(data.post.embed, BskyViewRecord):
             is_quote = True
             if isinstance(data.post.embed.record, BskyViewRecordRecord):

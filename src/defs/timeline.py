@@ -84,7 +84,15 @@ class Timeline:
     def get_post_text(post: HumanPost) -> str:
         text = "<b>Bsky Timeline Update</b>\n\n<code>"
         text += post.content
-        text += f"</code>\n\n{post.author.format} 发表于 {post.time_str}"
+        text += "</code>\n\n"
+        key = "发表"
+        if post.is_reply:
+            key = "回复"
+        elif post.is_quote:
+            key = "引用"
+        elif post.is_repost:
+            text += f"{post.repost_info.by.format} 转发于 {post.repost_info.time_str}\n"
+        text += f"{post.author.format} {key}于 {post.time_str}"
         return text
 
     @staticmethod
