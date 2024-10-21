@@ -13,6 +13,8 @@ from atproto_client.models.app.bsky.embed.record import (
     ViewRecord as BskyViewRecordRecord,
 )
 
+from src.defs.bsky_richtext import bsky_html_parser
+
 if TYPE_CHECKING:
     from atproto_client.models.app.bsky.feed.defs import (
         FeedViewPost,
@@ -141,7 +143,11 @@ class HumanPost(BaseModel, frozen=False):
             if isinstance(post, BskyViewRecordRecord)
             else post.embed
         )
-        content = record.text
+        content = (
+            bsky_html_parser.unparse(record.text, record.facets)
+            if record.facets
+            else record.text
+        )
         created_at = record.created_at
         # images
         images = []
