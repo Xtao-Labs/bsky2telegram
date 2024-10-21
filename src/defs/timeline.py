@@ -92,7 +92,8 @@ class Timeline:
             key = "引用"
         elif post.is_repost:
             text += f"{post.repost_info.by.format} 转发于 {post.repost_info.time_str}\n"
-        text += f"{post.author.format} {key}于 {post.time_str}"
+        text += f"{post.author.format} {key}于 {post.time_str}\n"
+        text += f"点赞: {post.like_count} | 引用: {post.quote_count} | 回复: {post.reply_count} | 转发: {post.repost_count}"
         return text
 
     @staticmethod

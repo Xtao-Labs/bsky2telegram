@@ -4,7 +4,9 @@ from src.core.bsky import BskyClient
 from src.defs.render import HumanPost
 
 client = BskyClient()
-parse = lambda url: url.replace("https://bsky.app/profile/", "at://").replace("post", "app.bsky.feed.post")
+parse = lambda url: url.replace("https://bsky.app/profile/", "at://").replace(
+    "post", "app.bsky.feed.post"
+)
 
 
 @pytest.mark.asyncio

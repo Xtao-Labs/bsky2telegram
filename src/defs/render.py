@@ -181,7 +181,9 @@ class HumanPost(BaseModel, frozen=False):
                 parent_post = HumanPost.parse_view(data.reply.parent)
         elif data.reason:
             is_repost = True
-            repost_info = HumanRepostInfo(by=HumanAuthor.parse(data.reason.by), at=data.reason.at)
+            repost_info = HumanRepostInfo(
+                by=HumanAuthor.parse(data.reason.by), at=data.reason.at
+            )
         elif data.post.embed and isinstance(data.post.embed, BskyViewRecord):
             is_quote = True
             if isinstance(data.post.embed.record, BskyViewRecordRecord):
