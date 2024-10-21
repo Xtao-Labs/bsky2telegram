@@ -192,7 +192,8 @@ class HumanPost(BaseModel, frozen=False):
         elif data.reason:
             is_repost = True
             repost_info = HumanRepostInfo(
-                by=HumanAuthor.parse(data.reason.by), at=data.reason.at
+                by=HumanAuthor.parse(data.reason.by),
+                at=data.reason.indexed_at,
             )
         elif data.post.embed and isinstance(data.post.embed, BskyViewRecord):
             is_quote = True
