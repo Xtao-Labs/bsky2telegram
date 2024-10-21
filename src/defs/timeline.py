@@ -57,14 +57,13 @@ class Timeline:
 
     @staticmethod
     def get_button(post: HumanPost) -> InlineKeyboardMarkup:
-        return InlineKeyboardMarkup(
-            [
-                [
-                    InlineKeyboardButton("Source", url=post.url),
-                    InlineKeyboardButton("Author", url=post.author.url),
-                ]
-            ]
-        )
+        buttons = [
+            InlineKeyboardButton("Source", url=post.url),
+            InlineKeyboardButton("Author", url=post.author.url),
+        ]
+        if post.parent_post:
+            buttons.insert(1, InlineKeyboardButton("RSource", url=post.parent_post.url))
+        return InlineKeyboardMarkup([buttons])
 
     @staticmethod
     def get_media_group(text: str, post: HumanPost) -> list[InputMediaPhoto]:
@@ -82,17 +81,19 @@ class Timeline:
 
     @staticmethod
     def get_post_text(post: HumanPost) -> str:
-        text = "<b>Bsky Timeline Update</b>\n\n<code>"
-        text += post.content
-        text += "</code>\n\n"
+        text = "<b>Bsky Timeline Update</b>\n\n"
         key = "发表"
         if post.is_reply:
             key = "回复"
         elif post.is_quote:
             key = "引用"
-        elif post.is_repost:
-            text += f"{post.repost_info.by.format} 转发于 {post.repost_info.time_str}\n"
+        if post.parent_post:
+            text += f"> {post.parent_post.content}\n\n=====================\n\n"
+        text += post.content
+        text += "\n\n"
         text += f"{post.author.format} {key}于 {post.time_str}\n"
+        if post.is_repost:
+            text += f"{post.repost_info.by.format} 转发于 {post.repost_info.time_str}\n"
         text += f"点赞: {post.like_count} | 引用: {post.quote_count} | 回复: {post.reply_count} | 转发: {post.repost_count}"
         return text
 
@@ -104,6 +105,15 @@ class Timeline:
             return await bot.send_animation(
                 config.push.chat_id,
                 post.gif,
+                caption=text,
+                reply_to_message_id=config.push.topic_id,
+                parse_mode=ParseMode.HTML,
+                reply_markup=Timeline.get_button(post),
+            )
+        elif post.external:
+            return await bot.send_document(
+                config.push.chat_id,
+                post.external,
                 caption=text,
                 reply_to_message_id=config.push.topic_id,
                 parse_mode=ParseMode.HTML,
