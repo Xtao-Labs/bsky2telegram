@@ -91,3 +91,13 @@ class TestRender:
         data = await client.client.get_timeline()
         posts = [HumanPost.parse(post) for post in data.feed]
         assert posts
+
+    @staticmethod
+    @pytest.mark.asyncio(scope="session")
+    async def test_porn_label():
+        uri = parse(
+            "https://bsky.app/profile/cabaretbara.bsky.social/post/3k3dzjntkv52i"
+        )
+        e = await client.client.get_post_thread(uri)
+        f = HumanPost.parse_thread(e.thread)
+        assert f.need_spoiler
