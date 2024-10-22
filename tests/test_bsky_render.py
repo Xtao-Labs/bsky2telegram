@@ -36,6 +36,7 @@ class TestRender:
         e = await client.client.get_post_thread(uri)
         f = HumanPost.parse_thread(e.thread)
         assert "all-time peak!" in f.content
+        print(f.video)
         assert f.video
 
     @staticmethod
