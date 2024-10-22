@@ -23,7 +23,6 @@ def flood_wait():
                 await asyncio.sleep(e.value + 1)
                 return await wrapper(*args, **kwargs)
             except Exception as e:
-                traceback.format_exc()
                 raise e
 
         return wrapper
@@ -152,5 +151,5 @@ class Timeline:
                 await Timeline.send_to_user(bot, post)
                 await PostCache.set(post)
             except Exception as e:
-                logs.error("Error when sending post: %s", str(e))
+                logs.error("Error when sending post: %s , %s", post.url, str(e))
         logs.info("Sending posts to user done!")
