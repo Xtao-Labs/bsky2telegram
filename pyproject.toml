@@ -19,8 +19,8 @@ dependencies = [
     "ujson>=5.10.0",
 ]
 
-[tool.uv]
-dev-dependencies = [
+[dependency-groups]
+dev = [
     "pytest>=8.3.3",
     "pytest-asyncio>=0.24.0",
     "ruff>=0.7.0",

@@ -4,7 +4,7 @@ from persica.factory.component import AsyncInitializingComponent
 
 class TimeScheduler(AsyncInitializingComponent):
     def __init__(self):
-        self.scheduler = AsyncIOScheduler(timezone="Asia/ShangHai")
+        self.scheduler = AsyncIOScheduler(timezone="Asia/Shanghai")
 
     async def initialize(self):
         self.scheduler.start()
